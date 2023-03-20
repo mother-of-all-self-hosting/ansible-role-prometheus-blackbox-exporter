@@ -5,6 +5,8 @@ prometheus_blackbox_exporter_enabled: true
 prometheus_blackbox_exporter_identifier: prometheus-blackbox-exporter
 prometheus_blackbox_exporter_uid: ''
 prometheus_blackbox_exporter_gid: ''
+
+# You don't need to configure a hostname and path prefix if you're not exposing this.
 prometheus_blackbox_exporter_hostname: ''
 prometheus_blackbox_exporter_path_prefix: "/metrics/blackbox-exporter"
 
@@ -89,9 +91,11 @@ prometheus_blackbox_exporter_systemd_wanted_services_list: []
 # See `../templates/labels.j2` for details.
 #
 # To inject your own other container labels, see `prometheus_blackbox_exporter_container_labels_additional_labels`.
-prometheus_blackbox_exporter_container_labels_traefik_enabled: true
+prometheus_blackbox_exporter_container_labels_traefik_enabled: "{{ true if prometheus_blackbox_exporter_hostname else false }}"
 prometheus_blackbox_exporter_container_labels_traefik_docker_network: "{{ prometheus_blackbox_exporter_container_network }}"
-prometheus_blackbox_exporter_container_labels_traefik_rule: "Host(`{{ prometheus_blackbox_exporter_hostname }}`) && PathPrefix(`{{ prometheus_blackbox_exporter_path_prefix | quote }}`)"
+prometheus_blackbox_exporter_container_labels_traefik_hostname: "{{ prometheus_blackbox_exporter_hostname }}"
+# The path prefix must either be `/` or not end with a slash (e.g. `/metrics`).
+prometheus_blackbox_exporter_container_labels_traefik_path_prefix: "{{ prometheus_blackbox_exporter_path_prefix }}"
 prometheus_blackbox_exporter_container_labels_traefik_entrypoints: web-secure
 prometheus_blackbox_exporter_container_labels_traefik_tls: "{{ prometheus_blackbox_exporter_container_labels_traefik_entrypoints != 'web' }}"
 prometheus_blackbox_exporter_container_labels_traefik_tls_certResolver: default  # noqa var-naming

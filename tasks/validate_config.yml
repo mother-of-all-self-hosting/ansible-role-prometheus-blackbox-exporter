@@ -7,6 +7,15 @@
   with_items:
     - prometheus_blackbox_exporter_uid
     - prometheus_blackbox_exporter_gid
-    - prometheus_blackbox_exporter_hostname
-    - prometheus_blackbox_exporter_path_prefix
     - prometheus_blackbox_exporter_container_network
+
+- when: prometheus_blackbox_exporter_container_labels_traefik_enabled | bool
+  block:
+    - name: Fail if required prometheus-blackbox-exporter Traefik settings not defined
+      ansible.builtin.fail:
+        msg: >-
+          You need to define a required configuration setting (`{{ item }}`).
+      when: "vars[item] == ''"
+      with_items:
+        - prometheus_blackbox_exporter_container_labels_traefik_hostname
+
