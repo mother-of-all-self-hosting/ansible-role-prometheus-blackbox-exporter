@@ -3,10 +3,8 @@
 - name: Ensure prometheus-blackbox-exporter is installed
   tags:
     - setup-all
-    - setup-prometheus
     - setup-prometheus-blackbox-exporter
     - install-all
-    - install-prometheus
     - install-prometheus-blackbox-exporter
   block:
     - name: Include prometheus-blackbox-exporter config validation tasks
@@ -19,10 +17,8 @@
 - name: Ensure prometheus-blackbox-exporter is removed
   tags:
     - setup-all
-    - setup-prometheus
     - setup-prometheus-blackbox-exporter
     - install-all
-    - install-prometheus
     - install-prometheus-blackbox-exporter
   block:
     - name: Include prometheus-blackbox-exporter removal tasks
