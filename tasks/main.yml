@@ -18,8 +18,6 @@
   tags:
     - setup-all
     - setup-prometheus-blackbox-exporter
-    - install-all
-    - install-prometheus-blackbox-exporter
   block:
     - name: Include prometheus-blackbox-exporter removal tasks
       when: not prometheus_blackbox_exporter_enabled | bool
