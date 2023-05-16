@@ -10,7 +10,7 @@ prometheus_blackbox_exporter_gid: ''
 prometheus_blackbox_exporter_hostname: ''
 prometheus_blackbox_exporter_path_prefix: "/metrics/blackbox-exporter"
 
-prometheus_blackbox_exporter_version: v0.23.0
+prometheus_blackbox_exporter_version: v0.24.0
 prometheus_blackbox_exporter_docker_image: "{{ prometheus_blackbox_exporter_docker_image_name_prefix }}prom/blackbox-exporter:{{ prometheus_blackbox_exporter_version }}"
 prometheus_blackbox_exporter_docker_image_name_prefix: "docker.io/"
 prometheus_blackbox_exporter_docker_image_force_pull: "{{ prometheus_blackbox_exporter_docker_image.endswith(':latest') }}"
