@@ -33,7 +33,7 @@
 - name: Ensure prometheus-blackbox-exporter config is created
   ansible.builtin.copy:
     content: "{{ prometheus_blackbox_exporter_configuration | to_nice_yaml(indent=2, width=999999) }}"
-    dest: "{{ prometheus_blackbox_exporter_config_path }}/config.yaml"
+    dest: "{{ prometheus_blackbox_exporter_config_path }}/config.yml"
     owner: "{{ prometheus_blackbox_exporter_uid }}"
     group: "{{ prometheus_blackbox_exporter_gid }}"
     mode: 0640
