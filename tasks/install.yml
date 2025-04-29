@@ -50,6 +50,6 @@
 
 - name: Ensure prometheus-blackbox-exporter systemd service installed
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/prometheus-blackbox-exporter.service.j2"
+    src: "{{ role_path }}/templates/systemd/prometheus-blackbox-exporter.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ prometheus_blackbox_exporter_identifier }}.service"
     mode: 0644
