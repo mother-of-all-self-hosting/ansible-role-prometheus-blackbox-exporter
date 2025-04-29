@@ -15,6 +15,7 @@ prometheus_blackbox_exporter_identifier: prometheus-blackbox-exporter
 prometheus_blackbox_exporter_base_path: "/{{ prometheus_blackbox_exporter_identifier }}"
 prometheus_blackbox_exporter_config_path: "{{ prometheus_blackbox_exporter_base_path }}/config"
 
+# renovate: datasource=docker depName=prom/blackbox-exporter versioning=semver
 prometheus_blackbox_exporter_version: v0.25.0
 
 prometheus_blackbox_exporter_uid: ''
