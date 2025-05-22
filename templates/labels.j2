@@ -31,13 +31,13 @@ traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.middlewares={
 {% endif %}
 
 traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.service={{ prometheus_blackbox_exporter_identifier }}
+traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.priority={{ prometheus_blackbox_exporter_container_labels_traefik_priority }}
+traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.entrypoints={{ prometheus_blackbox_exporter_container_labels_traefik_entrypoints }}
 
 traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.tls={{ prometheus_blackbox_exporter_container_labels_traefik_tls | to_json }}
 {% if prometheus_blackbox_exporter_container_labels_traefik_tls %}
 traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.tls.certResolver={{ prometheus_blackbox_exporter_container_labels_traefik_tls_certResolver }}
 {% endif %}
-
-traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.entrypoints={{ prometheus_blackbox_exporter_container_labels_traefik_entrypoints }}
 
 {% endif %}
 
