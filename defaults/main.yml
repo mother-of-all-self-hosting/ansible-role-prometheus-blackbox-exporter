@@ -35,9 +35,9 @@ prometheus_blackbox_exporter_container_image_registry_prefix_upstream: "{{ prome
 prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default: docker.io/
 prometheus_blackbox_exporter_container_image_force_pull: "{{ prometheus_blackbox_exporter_container_image.endswith(':latest') }}"
 
-# Controls whether the prometheus-blackbox-exporter container exposes its HTTP port (tcp/9100 in the container).
+# Controls whether the prometheus-blackbox-exporter container exposes its HTTP port (tcp/9115 in the container).
 #
-# Takes an "<ip>:<port>" value (e.g. "127.0.0.1:9100"), just a port number or empty string to not expose.
+# Takes an "<ip>:<port>" value (e.g. "127.0.0.1:9115"), just a port number or empty string to not expose.
 prometheus_blackbox_exporter_container_http_host_bind_port: ''
 
 # The base container network
@@ -45,7 +45,7 @@ prometheus_blackbox_exporter_container_http_host_bind_port: ''
 # Official recommendations are to run this container with `--net=host`,
 # but we don't do that, since it:
 # - exposes the metrics web server way too publicly (we'd potentially like to add HTTP Basic Auth, etc.)
-# - or listens on a loopback interface only (--net=host and 127.0.0.1:9100), which is not reachable from a local Prometheus container
+# - or listens on a loopback interface only (--net=host and 127.0.0.1:9115), which is not reachable from a local Prometheus container
 #
 # Not using `--net=host` means that our network statistic reports are likely broken (inaccurate),
 # because blackbox-exporter can't see all interfaces, etc.
@@ -53,7 +53,7 @@ prometheus_blackbox_exporter_container_http_host_bind_port: ''
 prometheus_blackbox_exporter_container_network: "{{ prometheus_blackbox_exporter_identifier }}"
 
 # The port number in the container
-prometheus_blackbox_exporter_container_http_port: 9100
+prometheus_blackbox_exporter_container_http_port: 9115
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
