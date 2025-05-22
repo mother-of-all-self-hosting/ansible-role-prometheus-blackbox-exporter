@@ -75,6 +75,8 @@ prometheus_blackbox_exporter_container_labels_traefik_docker_network: "{{ promet
 prometheus_blackbox_exporter_container_labels_traefik_hostname: "{{ prometheus_blackbox_exporter_hostname }}"
 # The path prefix must either be `/` or not end with a slash (e.g. `/metrics`).
 prometheus_blackbox_exporter_container_labels_traefik_path_prefix: "{{ prometheus_blackbox_exporter_path_prefix }}"
+prometheus_blackbox_exporter_container_labels_traefik_rule: "Host(`{{ prometheus_blackbox_exporter_container_labels_traefik_hostname }}`){% if prometheus_blackbox_exporter_container_labels_traefik_path_prefix != '/' %} && PathPrefix(`{{ prometheus_blackbox_exporter_container_labels_traefik_path_prefix }}`){% endif %}"
+prometheus_blackbox_exporter_container_labels_traefik_priority: 0
 prometheus_blackbox_exporter_container_labels_traefik_entrypoints: web-secure
 prometheus_blackbox_exporter_container_labels_traefik_tls: "{{ prometheus_blackbox_exporter_container_labels_traefik_entrypoints != 'web' }}"
 prometheus_blackbox_exporter_container_labels_traefik_tls_certResolver: default  # noqa var-naming
