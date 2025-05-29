@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 ---
-- name: Ensure prometheus-blackbox-exporter paths exist
+- name: Ensure Prometheus blackbox exporter paths exist
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -15,7 +15,7 @@
     - "{{ prometheus_blackbox_exporter_base_path }}"
     - "{{ prometheus_blackbox_exporter_config_path }}"
 
-- name: Ensure prometheus-blackbox-exporter labels file installed
+- name: Ensure Prometheus blackbox exporter labels file installed
   ansible.builtin.template:
     src: "{{ role_path }}/templates/labels.j2"
     dest: "{{ prometheus_blackbox_exporter_config_path }}/labels"
@@ -23,7 +23,7 @@
     group: "{{ prometheus_blackbox_exporter_gid }}"
     mode: "0640"
 
-- name: Ensure prometheus-blackbox-exporter configuration file installed
+- name: Ensure Prometheus blackbox exporter configuration file installed
   ansible.builtin.copy:
     content: "{{ prometheus_blackbox_exporter_configuration | to_nice_yaml(indent=2, width=999999) }}"
     dest: "{{ prometheus_blackbox_exporter_config_path }}/config.yml"
@@ -31,7 +31,7 @@
     group: "{{ prometheus_blackbox_exporter_gid }}"
     mode: "0640"
 
-- name: Ensure prometheus-blackbox-exporter image is pulled
+- name: Ensure Prometheus blackbox exporter image is pulled
   community.docker.docker_image:
     name: "{{ prometheus_blackbox_exporter_container_image }}"
     source: "{{ 'pull' if ansible_version.major > 2 or ansible_version.minor > 7 else omit }}"
@@ -42,7 +42,7 @@
   delay: "{{ devture_playbook_help_container_retries_delay }}"
   until: result is not failed
 
-- name: Ensure prometheus-blackbox-exporter container network is created
+- name: Ensure Prometheus blackbox exporter container network is created
   community.general.docker_network:
     enable_ipv6: "{{ devture_systemd_docker_base_ipv6_enabled }}"
     name: "{{ prometheus_blackbox_exporter_container_network }}"
@@ -50,7 +50,7 @@
     driver_options: "{{ devture_systemd_docker_base_container_networks_driver_options }}"
   when: prometheus_blackbox_exporter_container_network != 'host'
 
-- name: Ensure prometheus-blackbox-exporter systemd service is present
+- name: Ensure Prometheus blackbox exporter systemd service is present
   ansible.builtin.template:
     src: "{{ role_path }}/templates/systemd/prometheus-blackbox-exporter.service.j2"
     dest: "{{ devture_systemd_docker_base_systemd_path }}/{{ prometheus_blackbox_exporter_identifier }}.service"

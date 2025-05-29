@@ -22,7 +22,7 @@
     - { "old": "prometheus_blackbox_exporter_docker_image_name_prefix", "new": "prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default" }
     - { "old": "prometheus_blackbox_exporter_docker_image_force_pull", "new": "prometheus_blackbox_exporter_container_image_force_pull" }
 
-- name: Fail if required prometheus-blackbox-exporter settings not defined
+- name: Fail if required Prometheus blackbox exporter settings not defined
   ansible.builtin.fail:
     msg: >-
       You need to define a required configuration setting (`{{ item }}`).
@@ -35,7 +35,7 @@
 - name: Run if Traefik is enabled
   when: prometheus_blackbox_exporter_container_labels_traefik_enabled | bool
   block:
-    - name: Fail if required prometheus-blackbox-exporter Traefik settings not defined
+    - name: Fail if required Prometheus blackbox exporter Traefik settings not defined
       ansible.builtin.fail:
         msg: >-
           You need to define a required configuration setting (`{{ item }}`).

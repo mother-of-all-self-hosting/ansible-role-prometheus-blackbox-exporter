@@ -35,7 +35,7 @@ prometheus_blackbox_exporter_container_image_registry_prefix_upstream: "{{ prome
 prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default: docker.io/
 prometheus_blackbox_exporter_container_image_force_pull: "{{ prometheus_blackbox_exporter_container_image.endswith(':latest') }}"
 
-# Controls whether the prometheus-blackbox-exporter container exposes its HTTP port (tcp/9115 in the container).
+# Controls whether the Prometheus blackbox exporter container exposes its HTTP port (tcp/9115 in the container).
 #
 # Takes an "<ip>:<port>" value (e.g. "127.0.0.1:9115"), just a port number or empty string to not expose.
 prometheus_blackbox_exporter_container_http_host_bind_port: ''
@@ -100,13 +100,13 @@ prometheus_blackbox_exporter_container_extra_arguments: []
 # A list of extra arguments to pass to the blackbox_exporter process
 prometheus_blackbox_exporter_process_extra_arguments: []
 
-# List of systemd services that prometheus-blackbox-exporter.service depends on
+# List of systemd services that Prometheus blackbox exporter systemd service depends on
 prometheus_blackbox_exporter_systemd_required_services_list: "{{ prometheus_blackbox_exporter_systemd_required_services_list_default + prometheus_blackbox_exporter_systemd_required_services_list_auto + prometheus_blackbox_exporter_systemd_required_services_list_custom }}"
 prometheus_blackbox_exporter_systemd_required_services_list_default: "{{ [devture_systemd_docker_base_docker_service_name] if devture_systemd_docker_base_docker_service_name else [] }}"
 prometheus_blackbox_exporter_systemd_required_services_list_auto: []
 prometheus_blackbox_exporter_systemd_required_services_list_custom: []
 
-# List of systemd services that prometheus-blackbox-exporter.service wants
+# List of systemd services that Prometheus blackbox exporter systemd service wants
 prometheus_blackbox_exporter_systemd_wanted_services_list: []
 
 # Default blackbox exporter configuration template which covers the generic use case.
