@@ -5,6 +5,7 @@
 
 ---
 - name: Perform Prometheus blackbox exporter installation tasks
+  when: prometheus_blackbox_exporter_enabled | bool
   tags:
     - setup-all
     - setup-prometheus-blackbox-exporter
@@ -12,17 +13,15 @@
     - install-prometheus-blackbox-exporter
   block:
     - name: Validate Prometheus blackbox exporter configuration
-      when: prometheus_blackbox_exporter_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/validate_config.yml"
     - name: Install Prometheus blackbox exporter
-      when: prometheus_blackbox_exporter_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/install.yml"
 
 - name: Perform Prometheus blackbox exporter uninstallation tasks
+  when: not prometheus_blackbox_exporter_enabled | bool
   tags:
     - setup-all
     - setup-prometheus-blackbox-exporter
   block:
     - name: Uninstall Prometheus blackbox exporter
-      when: not prometheus_blackbox_exporter_enabled | bool
       ansible.builtin.include_tasks: "{{ role_path }}/tasks/uninstall.yml"
