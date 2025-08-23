@@ -106,8 +106,11 @@ prometheus_blackbox_exporter_systemd_required_services_list_default: "{{ [devtur
 prometheus_blackbox_exporter_systemd_required_services_list_auto: []
 prometheus_blackbox_exporter_systemd_required_services_list_custom: []
 
-# List of systemd services that Prometheus blackbox exporter systemd service wants
-prometheus_blackbox_exporter_systemd_wanted_services_list: []
+# List of systemd services that the Prometheus blackbox exporter systemd service wants
+prometheus_blackbox_exporter_systemd_wanted_services_list: "{{ prometheus_blackbox_exporter_systemd_wanted_services_list_default + prometheus_blackbox_exporter_systemd_wanted_services_list_auto + prometheus_blackbox_exporter_systemd_wanted_services_list_custom }}"
+prometheus_blackbox_exporter_systemd_wanted_services_list_default: []
+prometheus_blackbox_exporter_systemd_wanted_services_list_auto: []
+prometheus_blackbox_exporter_systemd_wanted_services_list_custom: []
 
 # Default blackbox exporter configuration template which covers the generic use case.
 # You can customize it by controlling the various variables inside it.
