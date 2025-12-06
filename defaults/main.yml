@@ -82,7 +82,7 @@ prometheus_blackbox_exporter_container_labels_traefik_tls: "{{ prometheus_blackb
 prometheus_blackbox_exporter_container_labels_traefik_tls_certResolver: default  # noqa var-naming
 
 prometheus_blackbox_exporter_container_labels_metrics_middleware_basic_auth_enabled: false
-# See: https://doc.traefik.io/traefik/middlewares/http/basicauth/#users
+# See: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
 prometheus_blackbox_exporter_container_labels_metrics_middleware_basic_auth_users: ''
 
 # prometheus_blackbox_exporter_container_labels_additional_labels contains a multiline string with additional labels to add to the container label file.
