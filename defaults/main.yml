@@ -95,7 +95,9 @@ prometheus_blackbox_exporter_container_labels_metrics_middleware_basic_auth_user
 prometheus_blackbox_exporter_container_labels_additional_labels: ''
 
 # A list of extra arguments to pass to the container
-prometheus_blackbox_exporter_container_extra_arguments: []
+prometheus_blackbox_exporter_container_extra_arguments: "{{ prometheus_blackbox_exporter_container_extra_arguments_auto + prometheus_blackbox_exporter_container_extra_arguments_custom }}"
+prometheus_blackbox_exporter_container_extra_arguments_auto: []
+prometheus_blackbox_exporter_container_extra_arguments_custom: []
 
 # A list of extra arguments to pass to the blackbox_exporter process
 prometheus_blackbox_exporter_process_extra_arguments: []
