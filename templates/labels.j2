@@ -40,4 +40,6 @@ traefik.http.routers.{{ prometheus_blackbox_exporter_identifier }}.tls.certResol
 traefik.http.services.{{ prometheus_blackbox_exporter_identifier }}.loadbalancer.server.port={{ prometheus_blackbox_exporter_container_http_port }}
 {% endif %}
 
-{{ prometheus_blackbox_exporter_container_labels_additional_labels }}
+{% for arg in prometheus_blackbox_exporter_container_labels_additional_labels %}
+{{ arg }}
+{% endfor %}

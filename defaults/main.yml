@@ -91,11 +91,11 @@ prometheus_blackbox_exporter_container_labels_metrics_middleware_basic_auth_user
 #
 # Example:
 # prometheus_blackbox_exporter_container_labels_additional_labels_custom: |
-#   my.label=1
-#   another.label="here"
-prometheus_blackbox_exporter_container_labels_additional_labels: "{{ prometheus_blackbox_exporter_container_labels_additional_labels_auto | combine(prometheus_blackbox_exporter_container_labels_additional_labels_custom) }}"
-prometheus_blackbox_exporter_container_labels_additional_labels_auto: {}
-prometheus_blackbox_exporter_container_labels_additional_labels_custom: {}
+#   - my.label=1
+#   - another.label="here"
+prometheus_blackbox_exporter_container_labels_additional_labels: "{{ prometheus_blackbox_exporter_container_labels_additional_labels_auto + prometheus_blackbox_exporter_container_labels_additional_labels_custom }}"
+prometheus_blackbox_exporter_container_labels_additional_labels_auto: []
+prometheus_blackbox_exporter_container_labels_additional_labels_custom: []
 
 # A list of extra arguments to pass to the container (`docker create` command)
 prometheus_blackbox_exporter_container_extra_arguments: "{{ prometheus_blackbox_exporter_container_extra_arguments_auto + prometheus_blackbox_exporter_container_extra_arguments_custom }}"
