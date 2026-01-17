@@ -35,7 +35,7 @@ prometheus_blackbox_exporter_container_image_registry_prefix_upstream: "{{ prome
 prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default: docker.io/
 prometheus_blackbox_exporter_container_image_force_pull: "{{ prometheus_blackbox_exporter_container_image.endswith(':latest') }}"
 
-# Controls whether the Prometheus blackbox exporter container exposes its HTTP port (tcp/9115 in the container).
+# Controls whether the container exposes its HTTP port (tcp/9115 in the container).
 #
 # Takes an "<ip>:<port>" value (e.g. "127.0.0.1:9115"), just a port number or empty string to not expose.
 prometheus_blackbox_exporter_container_http_host_bind_port: ""
