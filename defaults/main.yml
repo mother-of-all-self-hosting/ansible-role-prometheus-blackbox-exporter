@@ -102,8 +102,11 @@ prometheus_blackbox_exporter_container_extra_arguments: "{{ prometheus_blackbox_
 prometheus_blackbox_exporter_container_extra_arguments_auto: []
 prometheus_blackbox_exporter_container_extra_arguments_custom: []
 
-# A list of extra arguments to pass to the blackbox_exporter process
-prometheus_blackbox_exporter_process_extra_arguments: []
+# A list of extra arguments to pass to the Prometheus blackbox exporter process
+# Example: ['--SOME_ARGUMENT']
+prometheus_blackbox_exporter_process_extra_arguments: "{{ prometheus_blackbox_exporter_process_extra_arguments_auto + prometheus_blackbox_exporter_process_extra_arguments_custom }}"
+prometheus_blackbox_exporter_process_extra_arguments_auto: []
+prometheus_blackbox_exporter_process_extra_arguments_custom: []
 
 # List of systemd services that Prometheus blackbox exporter systemd service depends on
 prometheus_blackbox_exporter_systemd_required_services_list: "{{ prometheus_blackbox_exporter_systemd_required_services_list_default + prometheus_blackbox_exporter_systemd_required_services_list_auto + prometheus_blackbox_exporter_systemd_required_services_list_custom }}"
