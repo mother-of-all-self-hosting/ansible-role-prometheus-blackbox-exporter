@@ -21,11 +21,11 @@ prometheus_blackbox_exporter_version: v0.28.0
 prometheus_blackbox_exporter_uid: ""
 prometheus_blackbox_exporter_gid: ""
 
-# The hostname at which Prometheus blackbox exporter is served. You don't need to configure it if you're not exposing this.
+# The hostname at which Prometheus blackbox exporter is served.
 prometheus_blackbox_exporter_hostname: ""
 
-# The path at which Prometheus blackbox exporter is served. You don't need to configure it if you're not exposing this.
-# This value must either be `/` or not end with a slash.
+# The path at which Prometheus blackbox exporter is served.
+# This value must either be `/` or not end with a slash (e.g. `/prometheus-blackbox-exporter`).
 prometheus_blackbox_exporter_path_prefix: "/metrics/blackbox-exporter"
 
 prometheus_blackbox_exporter_container_image: "{{ prometheus_blackbox_exporter_container_image_registry_prefix }}prom/blackbox-exporter:{{ prometheus_blackbox_exporter_container_image_tag }}"
@@ -60,11 +60,7 @@ prometheus_blackbox_exporter_container_http_port: 9115
 
 # A list of additional container networks that the container would be connected to.
 # The role does not create these networks, so make sure they already exist.
-#
-# Use this to expose this container to another reverse proxy, which runs in a different container network,
-# without exposing all other container services to that other reverse-proxy.
-#
-# For background, see: https://github.com/spantaleev/matrix-docker-ansible-deploy/issues/1498
+# Use this to expose this container to another reverse proxy, which runs in a different container network.
 prometheus_blackbox_exporter_container_additional_networks: "{{ prometheus_blackbox_exporter_container_additional_networks_auto + prometheus_blackbox_exporter_container_additional_networks_custom }}"
 prometheus_blackbox_exporter_container_additional_networks_auto: []
 prometheus_blackbox_exporter_container_additional_networks_custom: []
