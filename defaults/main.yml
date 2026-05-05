@@ -33,7 +33,6 @@ prometheus_blackbox_exporter_container_image_tag: "{{ prometheus_blackbox_export
 prometheus_blackbox_exporter_container_image_registry_prefix: "{{ prometheus_blackbox_exporter_container_image_registry_prefix_upstream }}"
 prometheus_blackbox_exporter_container_image_registry_prefix_upstream: "{{ prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default }}"
 prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default: docker.io/
-prometheus_blackbox_exporter_container_image_force_pull: "{{ prometheus_blackbox_exporter_container_image.endswith(':latest') }}"
 
 # The base container network
 #

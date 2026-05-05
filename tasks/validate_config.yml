@@ -21,7 +21,7 @@
     - { "old": "prometheus_blackbox_exporter_basicauth_file_contents", "new": "<removed>" }
     - { "old": "prometheus_blackbox_exporter_docker_image", "new": "prometheus_blackbox_exporter_container_image" }
     - { "old": "prometheus_blackbox_exporter_docker_image_name_prefix", "new": "prometheus_blackbox_exporter_container_image_registry_prefix_upstream_default" }
-    - { "old": "prometheus_blackbox_exporter_docker_image_force_pull", "new": "prometheus_blackbox_exporter_container_image_force_pull" }
+    - { "old": "prometheus_blackbox_exporter_container_image_force_pull", "new": "<removed> (the new community.docker.docker_image_pull module handles this natively)" }
 
 - name: (Deprecation) Catch and report renamed variables for Traefik labels
   ansible.builtin.fail:
