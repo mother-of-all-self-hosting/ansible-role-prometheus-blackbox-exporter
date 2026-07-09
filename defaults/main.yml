@@ -78,7 +78,6 @@ prometheus_blackbox_exporter_container_labels_metrics_priority: 0
 prometheus_blackbox_exporter_container_labels_metrics_entrypoints: web-secure
 prometheus_blackbox_exporter_container_labels_metrics_tls: "{{ prometheus_blackbox_exporter_container_labels_metrics_entrypoints != 'web' }}"
 prometheus_blackbox_exporter_container_labels_metrics_tls_certResolver: default  # noqa var-naming
-
 prometheus_blackbox_exporter_container_labels_metrics_middleware_basic_auth_enabled: false
 # See: https://doc.traefik.io/traefik/reference/routing-configuration/http/middlewares/basicauth/
 prometheus_blackbox_exporter_container_labels_metrics_middleware_basic_auth_users: ""
