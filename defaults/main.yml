@@ -184,4 +184,4 @@ prometheus_blackbox_exporter_environment_variables_additional_variables: ""
 # any configuration files, the systemd service file, or the container image changed.
 # The default of `false` means "no restart needed" — appropriate when the role's
 # installation tasks haven't run (e.g., due to --tags skipping them).
-prometheus_blackbox_exporter_restart_necessary: falses
+prometheus_blackbox_exporter_restart_necessary: false
