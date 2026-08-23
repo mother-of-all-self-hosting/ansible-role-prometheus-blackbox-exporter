@@ -1,0 +1,111 @@
+# SPDX-FileCopyrightText: 2026 Slavi Pantaleev
+#
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+---
+dependency:
+  name: galaxy
+  options:
+    requirements-file: requirements.yml
+    force: true
+driver:
+  name: docker
+platforms:
+  - name: prometheus-blackbox-exporter-${MOLECULE_DISTRO:-ubuntu2604}-default
+    image: "geerlingguy/docker-${MOLECULE_DISTRO:-ubuntu2604}-ansible:latest"
+    command: ${MOLECULE_DOCKER_COMMAND:-""}
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    cgroupns_mode: host
+    privileged: true
+    pre_build_image: true
+provisioner:
+  name: ansible
+  config_options:
+    defaults:
+      callback_result_format: yaml
+  inventory:
+    group_vars:
+      all:
+        # Helper variables
+        prometheus_blackbox_exporter_debug_service_enabled: false
+
+        # The port on the host that the exporter's web server is published on.
+        prometheus_blackbox_exporter_molecule_http_bind_port: 9115
+
+        # A port that nothing listens on, used as the negative half of the
+        # probe round-trip below.
+        prometheus_blackbox_exporter_molecule_dead_port: 9
+
+        # The name of the module that this scenario adds on top of the role's
+        # own modules through the configuration extension. Deliberately unlike
+        # anything the stock image ships, so that a probe answered through it
+        # can only have come from the configuration this role rendered.
+        prometheus_blackbox_exporter_molecule_probe_module: molecule_http_healthy
+
+        # Everything the exporter serves is moved under this prefix through
+        # `prometheus_blackbox_exporter_process_extra_arguments_custom` below.
+        #
+        # The exporter's landing page answers 200 for every unknown path, so a
+        # status code alone says very little about what is running. Moving the
+        # endpoints is what turns that around: with a route prefix in effect,
+        # the un-prefixed paths answer 404, and `verify.yml` asserts both
+        # halves. That makes it a direct statement that the role's process
+        # arguments reached the running process.
+        prometheus_blackbox_exporter_molecule_route_prefix: /molecule
+
+        # Variables for Prometheus blackbox exporter
+        prometheus_blackbox_exporter_uid: 1000
+        prometheus_blackbox_exporter_gid: 1000
+        prometheus_blackbox_exporter_hostname: localhost
+        prometheus_blackbox_exporter_container_labels_metrics_enabled: false
+
+        # The role does not publish the exporter's port by default (it is meant
+        # to be scraped from another container on the same network), so the
+        # scenario publishes it in order to reach it from the test host.
+        prometheus_blackbox_exporter_container_http_host_bind_port: "127.0.0.1:{{ prometheus_blackbox_exporter_molecule_http_bind_port }}"
+
+        # Pinned to a literal value, so that `verify.yml` has something to
+        # compare `docker inspect` output against. The role derives this from
+        # `prometheus_blackbox_exporter_identifier` by default, which cannot be
+        # resolved out of the role's defaults file on its own.
+        prometheus_blackbox_exporter_container_network: prometheus-blackbox-exporter-molecule-default
+
+        prometheus_blackbox_exporter_process_extra_arguments_custom:
+          - "--web.route-prefix={{ prometheus_blackbox_exporter_molecule_route_prefix }}"
+
+        # The stock prom/blackbox-exporter image ships a configuration file of
+        # its own, with modules named `http_2xx`, `tcp_connect` and friends. An
+        # exporter that never received this role's configuration answers
+        # `/-/healthy`, serves `/metrics` and reports its version exactly like a
+        # correctly configured one does, so none of those tell the two apart.
+        #
+        # This module does. It is added on top of the role's own modules through
+        # the configuration extension, and a probe answered through it proves
+        # both that the extension mechanism works and that the rendered
+        # configuration file is what the running process loaded.
+        #
+        # `fail_if_body_not_matches_regexp` is what makes the probe a real
+        # round-trip rather than a connection test: the exporter has to read the
+        # response body and match it. Note the doubled `$$` in the expression
+        # below: Molecule interpolates this whole file before anything else
+        # reads it, and that is the only way a literal dollar sign survives.
+        # It has to be doubled in comments too, this one included - a lone `$$`
+        # anywhere in this file fails the run with "Invalid placeholder".
+        prometheus_blackbox_exporter_configuration_extension_yaml: |
+          modules:
+            {{ prometheus_blackbox_exporter_molecule_probe_module }}:
+              prober: http
+              timeout: 5s
+              http:
+                method: GET
+                valid_status_codes: [200]
+                fail_if_not_ssl: false
+                preferred_ip_protocol: ip4
+                fail_if_body_not_matches_regexp:
+                  - "^Healthy$$"
+  env:
+    # Workaround for https://github.com/ansible/molecule/issues/4391
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/..:/.ansible/roles:/usr/share/ansible/roles:/etc/ansible/roles:~/.ansible/roles
+verifier:
+  name: ansible
