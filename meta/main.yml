@@ -3,7 +3,7 @@ galaxy_info:
   author: etke.cc
   company: etke.cc
   role_name: prometheus_blackbox_exporter
-  namespace: etkecc
+  namespace: mash
   description: prometheus blackbox exporter role
   platforms:
     - name: Debian
