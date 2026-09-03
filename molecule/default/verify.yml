@@ -253,7 +253,7 @@
     # information metric reports the bare version (`0.28.0`). The comparison is
     # a prefix match, so that a build suffix appearing upstream does not fail
     # the scenario.
-    - name: Assert the running Prometheus blackbox exporter is the version the role asks for
+    - name: Assert the running Prometheus blackbox exporter is the version this role installs
       ansible.builtin.assert:
         that: >-
           prometheus_blackbox_exporter_running_version.startswith(
