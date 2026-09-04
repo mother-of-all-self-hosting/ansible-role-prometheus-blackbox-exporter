@@ -285,7 +285,7 @@
         fail_msg: "The container is not running on {{ prometheus_blackbox_exporter_container_network }}: {{ prometheus_blackbox_exporter_container_networks }}"
         success_msg: "The container runs on {{ prometheus_blackbox_exporter_container_network }}, as the role configured"
 
-    - name: Show Prometheus blackbox exporter verification summary
+    - name: Show the Prometheus blackbox exporter verification summary
       ansible.builtin.debug:
         msg:
           - "Prometheus blackbox exporter systemd: {{ prometheus_blackbox_exporter_service.status.ActiveState }}"
