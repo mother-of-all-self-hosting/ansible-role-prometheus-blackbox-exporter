@@ -254,10 +254,8 @@
           prometheus_blackbox_exporter_running_version.startswith(
             prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version | string | regex_replace('^v', '')
           )
-        fail_msg: >-
-          Prometheus blackbox exporter reports version {{ prometheus_blackbox_exporter_running_version }},
-          but the role asks for {{ prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version }}
-        success_msg: "Prometheus blackbox exporter reports version {{ prometheus_blackbox_exporter_running_version }}"
+        fail_msg: "Prometheus blackbox exporter reports {{ prometheus_blackbox_exporter_running_version | default('none') }}, expected {{ prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version }}"
+        success_msg: "Prometheus blackbox exporter reports {{ prometheus_blackbox_exporter_running_version }}"
 
     # Everything above talks to the exporter over its published port. This looks
     # at the container itself, and is what says that the network the role was
