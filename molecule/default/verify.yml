@@ -244,10 +244,9 @@
             | default([], true) | first | default('none')
           }}
 
-    # The version variable carries a leading `v` (`v0.28.0`) but the build
-    # information metric reports the bare version (`0.28.0`). The comparison is
-    # a prefix match, so that a build suffix appearing upstream does not fail
-    # the scenario.
+    # `prometheus_blackbox_exporter_version` carries a leading `v` (`v3.14.0`) but the binary
+    # reports the bare version (`3.14.0`). The comparison is a prefix match, so
+    # that a build suffix appearing upstream does not fail the scenario.
     - name: Assert the running Prometheus blackbox exporter is the version this role installs
       ansible.builtin.assert:
         that: >-
