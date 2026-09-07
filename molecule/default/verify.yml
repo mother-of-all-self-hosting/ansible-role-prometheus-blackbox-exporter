@@ -235,7 +235,7 @@
     # a YAML block scalar, where Jinja string literals keep their backslashes
     # verbatim, so the `\\1` that a double-quoted scalar would need arrives here
     # as two backslashes and `regex_search` rejects it.
-    - name: Determine the version the running Prometheus blackbox exporter reports
+    - name: Determine the version of the running Prometheus blackbox exporter
       ansible.builtin.set_fact:
         prometheus_blackbox_exporter_running_version: >-
           {{
