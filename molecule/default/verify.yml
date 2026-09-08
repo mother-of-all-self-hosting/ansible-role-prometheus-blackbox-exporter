@@ -268,10 +268,7 @@
     # network the probes above resolved their target on.
     - name: Query the running Prometheus blackbox exporter container
       ansible.builtin.command:
-        argv:
-          - docker
-          - inspect
-          - "{{ prometheus_blackbox_exporter_molecule_target_host }}"
+        cmd: docker inspect {{ prometheus_blackbox_exporter_molecule_target_host }}
       register: prometheus_blackbox_exporter_inspect
       changed_when: false
 
