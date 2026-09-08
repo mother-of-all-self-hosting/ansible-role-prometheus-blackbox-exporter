@@ -53,7 +53,7 @@
     - name: Retrieve the Prometheus blackbox exporter systemd service log for debugging
       when: prometheus_blackbox_exporter_debug_service_enabled | bool
       ansible.builtin.command:
-        cmd: journalctl -xeu prometheus-blackbox-exporter.service
+        cmd: journalctl --no-pager --output=cat --unit=prometheus-blackbox-exporter.service
       changed_when: false
 
     # A systemd unit reaching "active" only means that `docker start` has not
