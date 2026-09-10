@@ -24,279 +24,279 @@
   tasks:
     - name: Verify that Prometheus blackbox exporter works
       block:
-    # The role is not included in this playbook, so its defaults are not in
-    # scope. Reading defaults/main.yml directly ties the version assertion
-    # below.
-    - name: Load the role defaults
-      ansible.builtin.include_vars:
-        file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
-        name: prometheus_blackbox_exporter_defaults
+        # The role is not included in this playbook, so its defaults are not in
+        # scope. Reading defaults/main.yml directly ties the version assertion
+        # below.
+        - name: Load the role defaults
+          ansible.builtin.include_vars:
+            file: "{{ lookup('env', 'MOLECULE_PROJECT_DIRECTORY') }}/defaults/main.yml"
+            name: prometheus_blackbox_exporter_defaults
 
-    - name: Wait for the Prometheus blackbox exporter systemd service to become active (up to 180s)
-      ansible.builtin.systemd_service:
-        name: prometheus-blackbox-exporter.service
-      register: prometheus_blackbox_exporter_service
-      until: prometheus_blackbox_exporter_service.status.ActiveState == 'active'
-      retries: 36
-      delay: 5
-      # So that giving up is reported by the assertion below rather than as a
-      # wall of systemd unit properties.
-      failed_when: false
+        - name: Wait for the Prometheus blackbox exporter systemd service to become active (up to 180s)
+          ansible.builtin.systemd_service:
+            name: prometheus-blackbox-exporter.service
+          register: prometheus_blackbox_exporter_service
+          until: prometheus_blackbox_exporter_service.status.ActiveState == 'active'
+          retries: 36
+          delay: 5
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
 
-    # `Restart=always` in the systemd unit means that even a container which crashes
-    # and gets restarted reads as active here, so this is a precondition rather than
-    # a result.
-    - name: Assert the Prometheus blackbox exporter systemd service is active
-      ansible.builtin.assert:
-        that: prometheus_blackbox_exporter_service.status.ActiveState == 'active'
-        fail_msg: "prometheus-blackbox-exporter.service is not active ({{ prometheus_blackbox_exporter_service.status.ActiveState }})"
-        success_msg: "prometheus-blackbox-exporter.service is active"
+        # `Restart=always` in the systemd unit means that even a container which crashes
+        # and gets restarted reads as active here, so this is a precondition rather than
+        # a result.
+        - name: Assert the Prometheus blackbox exporter systemd service is active
+          ansible.builtin.assert:
+            that: prometheus_blackbox_exporter_service.status.ActiveState == 'active'
+            fail_msg: "prometheus-blackbox-exporter.service is not active ({{ prometheus_blackbox_exporter_service.status.ActiveState }})"
+            success_msg: "prometheus-blackbox-exporter.service is active"
 
-    - name: Retrieve the Prometheus blackbox exporter systemd service log for debugging
-      when: prometheus_blackbox_exporter_debug_service_enabled | bool
-      ansible.builtin.command:
-        cmd: journalctl --no-pager --output=cat --unit=prometheus-blackbox-exporter.service
-      changed_when: false
+        - name: Retrieve the Prometheus blackbox exporter systemd service log for debugging
+          when: prometheus_blackbox_exporter_debug_service_enabled | bool
+          ansible.builtin.command:
+            cmd: journalctl --no-pager --output=cat --unit=prometheus-blackbox-exporter.service
+          changed_when: false
 
-    # A systemd unit reaching "active" only means that `docker start` has not
-    # exited yet. This is the first thing that the exporter process itself has
-    # to answer, so it is where a container that never got going shows up.
-    - name: Wait for Prometheus blackbox exporter to report itself healthy (up to 10m)
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/-/healthy"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_healthy
-      until: prometheus_blackbox_exporter_healthy.status == 200
-      retries: 120
-      delay: 5
+        # A systemd unit reaching "active" only means that `docker start` has not
+        # exited yet. This is the first thing that the exporter process itself has
+        # to answer, so it is where a container that never got going shows up.
+        - name: Wait for Prometheus blackbox exporter to report itself healthy (up to 10m)
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/-/healthy"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_healthy
+          until: prometheus_blackbox_exporter_healthy.status == 200
+          retries: 120
+          delay: 5
 
-    - name: Assert Prometheus blackbox exporter reports itself healthy
-      ansible.builtin.assert:
-        that: "'Healthy' in prometheus_blackbox_exporter_healthy.content"
-        fail_msg: "Prometheus blackbox exporter is not healthy: {{ prometheus_blackbox_exporter_healthy.content | default('no content') }}"
-        success_msg: "Prometheus blackbox exporter reports itself healthy"
+        - name: Assert Prometheus blackbox exporter reports itself healthy
+          ansible.builtin.assert:
+            that: "'Healthy' in prometheus_blackbox_exporter_healthy.content"
+            fail_msg: "Prometheus blackbox exporter is not healthy: {{ prometheus_blackbox_exporter_healthy.content | default('no content') }}"
+            success_msg: "Prometheus blackbox exporter reports itself healthy"
 
-    # The other half of the check above, and the reason the scenario bothers
-    # with a route prefix at all: the exporter's landing page answers 200 for
-    # every path it does not recognize, so a 200 on its own proves very little.
-    #
-    # A 404 here can only happen because `--web.route-prefix`, contributed by
-    # `prometheus_blackbox_exporter_process_extra_arguments`, reached the
-    # process command line that the systemd unit builds.
-    - name: Retrieve Prometheus blackbox exporter health outside of the route prefix
-      ansible.builtin.uri:
-        url: "http://127.0.0.1:{{ prometheus_blackbox_exporter_molecule_http_bind_port }}/-/healthy"
-        method: GET
-        status_code: [404]
-        return_content: true
-      register: prometheus_blackbox_exporter_unprefixed_healthy
+        # The other half of the check above, and the reason the scenario bothers
+        # with a route prefix at all: the exporter's landing page answers 200 for
+        # every path it does not recognize, so a 200 on its own proves very little.
+        #
+        # A 404 here can only happen because `--web.route-prefix`, contributed by
+        # `prometheus_blackbox_exporter_process_extra_arguments`, reached the
+        # process command line that the systemd unit builds.
+        - name: Retrieve Prometheus blackbox exporter health outside of the route prefix
+          ansible.builtin.uri:
+            url: "http://127.0.0.1:{{ prometheus_blackbox_exporter_molecule_http_bind_port }}/-/healthy"
+            method: GET
+            status_code: [404]
+            return_content: true
+          register: prometheus_blackbox_exporter_unprefixed_healthy
 
-    - name: Assert the role's process arguments reached the running Prometheus blackbox exporter
-      ansible.builtin.assert:
-        that: prometheus_blackbox_exporter_unprefixed_healthy.status == 404
-        fail_msg: "The exporter serves /-/healthy outside {{ prometheus_blackbox_exporter_molecule_route_prefix }}, so --web.route-prefix did not reach it"
-        success_msg: "The exporter serves only under {{ prometheus_blackbox_exporter_molecule_route_prefix }}, as the role's process arguments asked"
+        - name: Assert the role's process arguments reached the running Prometheus blackbox exporter
+          ansible.builtin.assert:
+            that: prometheus_blackbox_exporter_unprefixed_healthy.status == 404
+            fail_msg: "The exporter serves /-/healthy outside {{ prometheus_blackbox_exporter_molecule_route_prefix }}, so --web.route-prefix did not reach it"
+            success_msg: "The exporter serves only under {{ prometheus_blackbox_exporter_molecule_route_prefix }}, as the role's process arguments asked"
 
-    # The configuration the role rendered, read back out of the running process
-    # rather than off disk.
-    - name: Query the configuration the running Prometheus blackbox exporter loaded
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/config"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_config
+        # The configuration the role rendered, read back out of the running process
+        # rather than off disk.
+        - name: Query the configuration the running Prometheus blackbox exporter loaded
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/config"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_config
 
-    - name: Determine the modules the running Prometheus blackbox exporter knows about
-      ansible.builtin.set_fact:
-        prometheus_blackbox_exporter_module_names: "{{ (prometheus_blackbox_exporter_config.content | from_yaml).modules.keys() | list | sort }}"
+        - name: Determine the modules the running Prometheus blackbox exporter knows about
+          ansible.builtin.set_fact:
+            prometheus_blackbox_exporter_module_names: "{{ (prometheus_blackbox_exporter_config.content | from_yaml).modules.keys() | list | sort }}"
 
-    # The stock image ships `http_2xx`, `tcp_connect`, `grpc`, `ssh_banner` and
-    # friends; this role's template ships `http`, `tcp`, `dns` and `icmp`. Only
-    # `icmp` is named the same in both, which is why it is not asserted on here.
-    - name: Assert the role's configuration reached the running Prometheus blackbox exporter
-      ansible.builtin.assert:
-        that:
-          - "'http' in prometheus_blackbox_exporter_module_names"
-          - "'tcp' in prometheus_blackbox_exporter_module_names"
-          - "'dns' in prometheus_blackbox_exporter_module_names"
-          - prometheus_blackbox_exporter_molecule_probe_module in prometheus_blackbox_exporter_module_names
-          - "'http_2xx' not in prometheus_blackbox_exporter_module_names"
-          - "'tcp_connect' not in prometheus_blackbox_exporter_module_names"
-        fail_msg: "The running exporter knows about {{ prometheus_blackbox_exporter_module_names }}, which is not what the role configured"
-        success_msg: "The running exporter knows exactly the modules the role configured: {{ prometheus_blackbox_exporter_module_names }}"
+        # The stock image ships `http_2xx`, `tcp_connect`, `grpc`, `ssh_banner` and
+        # friends; this role's template ships `http`, `tcp`, `dns` and `icmp`. Only
+        # `icmp` is named the same in both, which is why it is not asserted on here.
+        - name: Assert the role's configuration reached the running Prometheus blackbox exporter
+          ansible.builtin.assert:
+            that:
+              - "'http' in prometheus_blackbox_exporter_module_names"
+              - "'tcp' in prometheus_blackbox_exporter_module_names"
+              - "'dns' in prometheus_blackbox_exporter_module_names"
+              - prometheus_blackbox_exporter_molecule_probe_module in prometheus_blackbox_exporter_module_names
+              - "'http_2xx' not in prometheus_blackbox_exporter_module_names"
+              - "'tcp_connect' not in prometheus_blackbox_exporter_module_names"
+            fail_msg: "The running exporter knows about {{ prometheus_blackbox_exporter_module_names }}, which is not what the role configured"
+            success_msg: "The running exporter knows exactly the modules the role configured: {{ prometheus_blackbox_exporter_module_names }}"
 
-    # Stronger than the module listing above, because it is the probe handler
-    # itself - not the configuration endpoint - refusing a module that only the
-    # stock configuration file defines.
-    - name: Probe through a module that only the stock configuration file defines
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module=http_2xx&target=http://{{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_target_port }}/"
-        method: GET
-        status_code: [400]
-        return_content: true
-      register: prometheus_blackbox_exporter_stock_module_probe
+        # Stronger than the module listing above, because it is the probe handler
+        # itself - not the configuration endpoint - refusing a module that only the
+        # stock configuration file defines.
+        - name: Probe through a module that only the stock configuration file defines
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module=http_2xx&target=http://{{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_target_port }}/"
+            method: GET
+            status_code: [400]
+            return_content: true
+          register: prometheus_blackbox_exporter_stock_module_probe
 
-    - name: Assert the stock configuration file is not what the exporter loaded
-      ansible.builtin.assert:
-        that: "'Unknown module' in prometheus_blackbox_exporter_stock_module_probe.content"
-        fail_msg: "The exporter accepted the stock `http_2xx` module: {{ prometheus_blackbox_exporter_stock_module_probe.content }}"
-        success_msg: "The exporter rejects the stock `http_2xx` module, so it is not running the image's own configuration"
+        - name: Assert the stock configuration file is not what the exporter loaded
+          ansible.builtin.assert:
+            that: "'Unknown module' in prometheus_blackbox_exporter_stock_module_probe.content"
+            fail_msg: "The exporter accepted the stock `http_2xx` module: {{ prometheus_blackbox_exporter_stock_module_probe.content }}"
+            success_msg: "The exporter rejects the stock `http_2xx` module, so it is not running the image's own configuration"
 
-    # Probing other things is the whole job of this exporter, so this is what
-    # makes the scenario a test of the role rather than of a container that
-    # happens to answer HTTP.
-    #
-    # The target is the exporter's own web server, addressed by its container
-    # name over the container network the role created. That keeps the scenario
-    # entirely offline while still exercising the real path: the name is
-    # resolved by the network's DNS, a TCP connection is opened over the bridge,
-    # a request is written, and the response body is read back and matched
-    # against the module's regular expression.
-    #
-    # A separate target on the test host would have been the more obvious
-    # choice, but Docker 28 and newer no longer let a container reach host ports
-    # through the bridge gateway, and the image the role pulls is the only one
-    # present on the test host, so there is nothing else to serve from.
-    - name: Probe a reachable target through the module the scenario configured
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module={{ prometheus_blackbox_exporter_molecule_probe_module }}&target=http://{{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_target_port }}{{ prometheus_blackbox_exporter_molecule_route_prefix }}/-/healthy"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_probe_up
+        # Probing other things is the whole job of this exporter, so this is what
+        # makes the scenario a test of the role rather than of a container that
+        # happens to answer HTTP.
+        #
+        # The target is the exporter's own web server, addressed by its container
+        # name over the container network the role created. That keeps the scenario
+        # entirely offline while still exercising the real path: the name is
+        # resolved by the network's DNS, a TCP connection is opened over the bridge,
+        # a request is written, and the response body is read back and matched
+        # against the module's regular expression.
+        #
+        # A separate target on the test host would have been the more obvious
+        # choice, but Docker 28 and newer no longer let a container reach host ports
+        # through the bridge gateway, and the image the role pulls is the only one
+        # present on the test host, so there is nothing else to serve from.
+        - name: Probe a reachable target through the module the scenario configured
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module={{ prometheus_blackbox_exporter_molecule_probe_module }}&target=http://{{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_target_port }}{{ prometheus_blackbox_exporter_molecule_route_prefix }}/-/healthy"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_probe_up
 
-    - name: Determine what the probe of a reachable target reported
-      ansible.builtin.set_fact:
-        prometheus_blackbox_exporter_probe_up_lines: "{{ prometheus_blackbox_exporter_probe_up.content.splitlines() }}"
+        - name: Determine what the probe of a reachable target reported
+          ansible.builtin.set_fact:
+            prometheus_blackbox_exporter_probe_up_lines: "{{ prometheus_blackbox_exporter_probe_up.content.splitlines() }}"
 
-    - name: Assert the probe of a reachable target succeeded
-      ansible.builtin.assert:
-        that:
-          - "'probe_success 1' in prometheus_blackbox_exporter_probe_up_lines"
-          - "'probe_http_status_code 200' in prometheus_blackbox_exporter_probe_up_lines"
-          # 0 means the body matched what the module requires it to match,
-          # which is what tells a completed HTTP exchange apart from a bare
-          # connection.
-          - "'probe_failed_due_to_regex 0' in prometheus_blackbox_exporter_probe_up_lines"
-        fail_msg: "The probe of a reachable target did not succeed: {{ prometheus_blackbox_exporter_probe_up.content }}"
-        success_msg: "The exporter probed a reachable target and reported it up"
+        - name: Assert the probe of a reachable target succeeded
+          ansible.builtin.assert:
+            that:
+              - "'probe_success 1' in prometheus_blackbox_exporter_probe_up_lines"
+              - "'probe_http_status_code 200' in prometheus_blackbox_exporter_probe_up_lines"
+              # 0 means the body matched what the module requires it to match,
+              # which is what tells a completed HTTP exchange apart from a bare
+              # connection.
+              - "'probe_failed_due_to_regex 0' in prometheus_blackbox_exporter_probe_up_lines"
+            fail_msg: "The probe of a reachable target did not succeed: {{ prometheus_blackbox_exporter_probe_up.content }}"
+            success_msg: "The exporter probed a reachable target and reported it up"
 
-    # The negative half, and the one that proves the probe result is a
-    # measurement rather than a constant: the same module against a port on the
-    # same host where nothing listens has to come back down.
-    - name: Probe an unreachable target through the module the scenario configured
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module={{ prometheus_blackbox_exporter_molecule_probe_module }}&target=http://{{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_dead_port }}/"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_probe_down
+        # The negative half, and the one that proves the probe result is a
+        # measurement rather than a constant: the same module against a port on the
+        # same host where nothing listens has to come back down.
+        - name: Probe an unreachable target through the module the scenario configured
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module={{ prometheus_blackbox_exporter_molecule_probe_module }}&target=http://{{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_dead_port }}/"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_probe_down
 
-    - name: Determine what the probe of an unreachable target reported
-      ansible.builtin.set_fact:
-        prometheus_blackbox_exporter_probe_down_lines: "{{ prometheus_blackbox_exporter_probe_down.content.splitlines() }}"
+        - name: Determine what the probe of an unreachable target reported
+          ansible.builtin.set_fact:
+            prometheus_blackbox_exporter_probe_down_lines: "{{ prometheus_blackbox_exporter_probe_down.content.splitlines() }}"
 
-    - name: Assert the probe of an unreachable target failed
-      ansible.builtin.assert:
-        that:
-          - "'probe_success 0' in prometheus_blackbox_exporter_probe_down_lines"
-          - "'probe_http_status_code 0' in prometheus_blackbox_exporter_probe_down_lines"
-        fail_msg: "The probe of an unreachable target did not fail: {{ prometheus_blackbox_exporter_probe_down.content }}"
-        success_msg: "The exporter probed an unreachable target and reported it down"
+        - name: Assert the probe of an unreachable target failed
+          ansible.builtin.assert:
+            that:
+              - "'probe_success 0' in prometheus_blackbox_exporter_probe_down_lines"
+              - "'probe_http_status_code 0' in prometheus_blackbox_exporter_probe_down_lines"
+            fail_msg: "The probe of an unreachable target did not fail: {{ prometheus_blackbox_exporter_probe_down.content }}"
+            success_msg: "The exporter probed an unreachable target and reported it down"
 
-    # The two probes above go through a module this scenario added. This one
-    # goes through `tcp`, which comes from the role's own configuration template
-    # and is not named like anything the stock configuration file defines, so it
-    # ties a working probe to what the role itself ships.
-    - name: Probe a reachable target through the role's own `tcp` module
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module=tcp&target={{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_target_port }}"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_tcp_probe_up
+        # The two probes above go through a module this scenario added. This one
+        # goes through `tcp`, which comes from the role's own configuration template
+        # and is not named like anything the stock configuration file defines, so it
+        # ties a working probe to what the role itself ships.
+        - name: Probe a reachable target through the role's own `tcp` module
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module=tcp&target={{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_target_port }}"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_tcp_probe_up
 
-    - name: Probe an unreachable target through the role's own `tcp` module
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module=tcp&target={{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_dead_port }}"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_tcp_probe_down
+        - name: Probe an unreachable target through the role's own `tcp` module
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/probe?module=tcp&target={{ prometheus_blackbox_exporter_molecule_target_host }}:{{ prometheus_blackbox_exporter_molecule_dead_port }}"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_tcp_probe_down
 
-    - name: Assert the role's own `tcp` module probes in both directions
-      ansible.builtin.assert:
-        that:
-          - "'probe_success 1' in prometheus_blackbox_exporter_tcp_probe_up.content.splitlines()"
-          - "'probe_success 0' in prometheus_blackbox_exporter_tcp_probe_down.content.splitlines()"
-        fail_msg: "The role's `tcp` module did not probe as expected (up: {{ prometheus_blackbox_exporter_tcp_probe_up.content }}, down: {{ prometheus_blackbox_exporter_tcp_probe_down.content }})"
-        success_msg: "The role's own `tcp` module reports a listening port up and a closed one down"
+        - name: Assert the role's own `tcp` module probes in both directions
+          ansible.builtin.assert:
+            that:
+              - "'probe_success 1' in prometheus_blackbox_exporter_tcp_probe_up.content.splitlines()"
+              - "'probe_success 0' in prometheus_blackbox_exporter_tcp_probe_down.content.splitlines()"
+            fail_msg: "The role's `tcp` module did not probe as expected (up: {{ prometheus_blackbox_exporter_tcp_probe_up.content }}, down: {{ prometheus_blackbox_exporter_tcp_probe_down.content }})"
+            success_msg: "The role's own `tcp` module reports a listening port up and a closed one down"
 
-    # Tying the running version to `prometheus_blackbox_exporter_version` is
-    # what makes this scenario a real test of the version that Renovate bumps:
-    # a bump that produces an unusable image cannot pass here.
-    - name: Query the metrics the running Prometheus blackbox exporter serves
-      ansible.builtin.uri:
-        url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/metrics"
-        method: GET
-        return_content: true
-      register: prometheus_blackbox_exporter_metrics
+        # Tying the running version to `prometheus_blackbox_exporter_version` is
+        # what makes this scenario a real test of the version that Renovate bumps:
+        # a bump that produces an unusable image cannot pass here.
+        - name: Query the metrics the running Prometheus blackbox exporter serves
+          ansible.builtin.uri:
+            url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/metrics"
+            method: GET
+            return_content: true
+          register: prometheus_blackbox_exporter_metrics
 
-    # The group reference is written with a single backslash on purpose. This is
-    # a YAML block scalar, where Jinja string literals keep their backslashes
-    # verbatim, so the `\\1` that a double-quoted scalar would need arrives here
-    # as two backslashes and `regex_search` rejects it.
-    - name: Determine the version of the running Prometheus blackbox exporter
-      ansible.builtin.set_fact:
-        prometheus_blackbox_exporter_running_version: >-
-          {{
-            prometheus_blackbox_exporter_metrics.content
-            | regex_search('blackbox_exporter_build_info.*version="([^"]+)"', '\1')
-            | default([], true) | first | default('none')
-          }}
+        # The group reference is written with a single backslash on purpose. This is
+        # a YAML block scalar, where Jinja string literals keep their backslashes
+        # verbatim, so the `\\1` that a double-quoted scalar would need arrives here
+        # as two backslashes and `regex_search` rejects it.
+        - name: Determine the version of the running Prometheus blackbox exporter
+          ansible.builtin.set_fact:
+            prometheus_blackbox_exporter_running_version: >-
+              {{
+                prometheus_blackbox_exporter_metrics.content
+                | regex_search('blackbox_exporter_build_info.*version="([^"]+)"', '\1')
+                | default([], true) | first | default('none')
+              }}
 
-    # `prometheus_blackbox_exporter_version` carries a leading `v` (`v3.14.0`) but the binary
-    # reports the bare version (`3.14.0`). The comparison is a prefix match, so
-    # that a build suffix appearing upstream does not fail the scenario.
-    - name: Assert the running Prometheus blackbox exporter is the version this role installs
-      ansible.builtin.assert:
-        that: >-
-          prometheus_blackbox_exporter_running_version.startswith(
-            prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version | string | regex_replace('^v', '')
-          )
-        fail_msg: "Prometheus blackbox exporter reports {{ prometheus_blackbox_exporter_running_version | default('none') }}, expected {{ prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version }}"
-        success_msg: "Prometheus blackbox exporter reports {{ prometheus_blackbox_exporter_running_version }}"
+        # `prometheus_blackbox_exporter_version` carries a leading `v` (`v3.14.0`) but the binary
+        # reports the bare version (`3.14.0`). The comparison is a prefix match, so
+        # that a build suffix appearing upstream does not fail the scenario.
+        - name: Assert the running Prometheus blackbox exporter is the version this role installs
+          ansible.builtin.assert:
+            that: >-
+              prometheus_blackbox_exporter_running_version.startswith(
+                prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version | string | regex_replace('^v', '')
+              )
+            fail_msg: "Prometheus blackbox exporter reports {{ prometheus_blackbox_exporter_running_version | default('none') }}, expected {{ prometheus_blackbox_exporter_defaults.prometheus_blackbox_exporter_version }}"
+            success_msg: "Prometheus blackbox exporter reports {{ prometheus_blackbox_exporter_running_version }}"
 
-    # Everything above talks to the exporter over its published port. This looks
-    # at the container itself, and is what says that the network the role was
-    # told to use is the network the container actually joined - the same
-    # network the probes above resolved their target on.
-    - name: Query the running Prometheus blackbox exporter container
-      ansible.builtin.command:
-        cmd: docker inspect {{ prometheus_blackbox_exporter_molecule_target_host }}
-      register: prometheus_blackbox_exporter_inspect
-      changed_when: false
+        # Everything above talks to the exporter over its published port. This looks
+        # at the container itself, and is what says that the network the role was
+        # told to use is the network the container actually joined - the same
+        # network the probes above resolved their target on.
+        - name: Query the running Prometheus blackbox exporter container
+          ansible.builtin.command:
+            cmd: docker inspect {{ prometheus_blackbox_exporter_molecule_target_host }}
+          register: prometheus_blackbox_exporter_inspect
+          changed_when: false
 
-    - name: Determine how the Prometheus blackbox exporter container is attached
-      ansible.builtin.set_fact:
-        prometheus_blackbox_exporter_container_networks: "{{ (prometheus_blackbox_exporter_inspect.stdout | from_json | first).NetworkSettings.Networks.keys() | list | sort }}"
-        prometheus_blackbox_exporter_container_running: "{{ (prometheus_blackbox_exporter_inspect.stdout | from_json | first).State.Running }}"
+        - name: Determine how the Prometheus blackbox exporter container is attached
+          ansible.builtin.set_fact:
+            prometheus_blackbox_exporter_container_networks: "{{ (prometheus_blackbox_exporter_inspect.stdout | from_json | first).NetworkSettings.Networks.keys() | list | sort }}"
+            prometheus_blackbox_exporter_container_running: "{{ (prometheus_blackbox_exporter_inspect.stdout | from_json | first).State.Running }}"
 
-    - name: Assert the container runs on the network the role configured
-      ansible.builtin.assert:
-        that:
-          - prometheus_blackbox_exporter_container_running | bool
-          - prometheus_blackbox_exporter_container_network in prometheus_blackbox_exporter_container_networks
-        fail_msg: "The container is not running on {{ prometheus_blackbox_exporter_container_network }}: {{ prometheus_blackbox_exporter_container_networks }}"
-        success_msg: "The container runs on {{ prometheus_blackbox_exporter_container_network }}, as the role configured"
+        - name: Assert the container runs on the network the role configured
+          ansible.builtin.assert:
+            that:
+              - prometheus_blackbox_exporter_container_running | bool
+              - prometheus_blackbox_exporter_container_network in prometheus_blackbox_exporter_container_networks
+            fail_msg: "The container is not running on {{ prometheus_blackbox_exporter_container_network }}: {{ prometheus_blackbox_exporter_container_networks }}"
+            success_msg: "The container runs on {{ prometheus_blackbox_exporter_container_network }}, as the role configured"
 
-    - name: Show the Prometheus blackbox exporter verification summary
-      ansible.builtin.debug:
-        msg:
-          - "Prometheus blackbox exporter systemd: {{ prometheus_blackbox_exporter_service.status.ActiveState }}"
-          - "Prometheus blackbox exporter version: {{ prometheus_blackbox_exporter_running_version }}"
-          - "Prometheus blackbox exporter modules: {{ prometheus_blackbox_exporter_module_names | join(', ') }}"
-          - "Prometheus blackbox exporter un-prefixed /-/healthy: {{ prometheus_blackbox_exporter_unprefixed_healthy.status }}"
-          - "Prometheus blackbox exporter probe of a reachable target: {{ prometheus_blackbox_exporter_probe_up.content | regex_search('probe_success [0-9]') }}"
-          - "Prometheus blackbox exporter probe of an unreachable target: {{ prometheus_blackbox_exporter_probe_down.content | regex_search('probe_success [0-9]') }}"
-          - "Prometheus blackbox exporter container networks: {{ prometheus_blackbox_exporter_container_networks | join(', ') }}"
+        - name: Show the Prometheus blackbox exporter verification summary
+          ansible.builtin.debug:
+            msg:
+              - "Prometheus blackbox exporter systemd: {{ prometheus_blackbox_exporter_service.status.ActiveState }}"
+              - "Prometheus blackbox exporter version: {{ prometheus_blackbox_exporter_running_version }}"
+              - "Prometheus blackbox exporter modules: {{ prometheus_blackbox_exporter_module_names | join(', ') }}"
+              - "Prometheus blackbox exporter un-prefixed /-/healthy: {{ prometheus_blackbox_exporter_unprefixed_healthy.status }}"
+              - "Prometheus blackbox exporter probe of a reachable target: {{ prometheus_blackbox_exporter_probe_up.content | regex_search('probe_success [0-9]') }}"
+              - "Prometheus blackbox exporter probe of an unreachable target: {{ prometheus_blackbox_exporter_probe_down.content | regex_search('probe_success [0-9]') }}"
+              - "Prometheus blackbox exporter container networks: {{ prometheus_blackbox_exporter_container_networks | join(', ') }}"
 
       rescue:
         # Whatever went wrong, the reason is almost always in the systemd service log.
