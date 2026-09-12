@@ -68,20 +68,23 @@
         # A systemd unit reaching "active" only means that `docker start` has not
         # exited yet. This is the first thing that the exporter process itself has
         # to answer, so it is where a container that never got going shows up.
-        - name: Wait for Prometheus blackbox exporter to report itself healthy (up to 10m)
+        - name: Wait for Prometheus blackbox exporter to report itself healthy (up to 180s)
           ansible.builtin.uri:
             url: "{{ prometheus_blackbox_exporter_molecule_base_url }}/-/healthy"
             method: GET
             return_content: true
-          register: prometheus_blackbox_exporter_healthy
-          until: prometheus_blackbox_exporter_healthy.status == 200
-          retries: 120
+          register: prometheus_blackbox_exporter_health
+          until: "prometheus_blackbox_exporter_health.status == 200 and 'Healthy' in prometheus_blackbox_exporter_health.content"
+          retries: 36
           delay: 5
+          # So that giving up is reported by the assertion below rather than as a
+          # wall of systemd unit properties.
+          failed_when: false
 
         - name: Assert Prometheus blackbox exporter reports itself healthy
           ansible.builtin.assert:
-            that: "'Healthy' in prometheus_blackbox_exporter_healthy.content"
-            fail_msg: "Prometheus blackbox exporter is not healthy: {{ prometheus_blackbox_exporter_healthy.content | default('no content') }}"
+            that: "'Healthy' in prometheus_blackbox_exporter_health.content"
+            fail_msg: "Prometheus blackbox exporter did not report itself healthy: {{ prometheus_blackbox_exporter_health.content | default('no response') }}"
             success_msg: "Prometheus blackbox exporter reports itself healthy"
 
         # The other half of the check above, and the reason the scenario bothers
