@@ -31,6 +31,7 @@ provisioner:
       all:
         # Helper variables
         prometheus_blackbox_exporter_debug_service_enabled: false
+        prometheus_blackbox_exporter_restarts_check_enabled: true
 
         # The port on the host that the exporter's web server is published on.
         prometheus_blackbox_exporter_molecule_http_bind_port: 9115
