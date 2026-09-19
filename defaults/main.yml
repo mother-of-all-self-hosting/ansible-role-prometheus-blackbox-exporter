@@ -99,10 +99,11 @@ prometheus_blackbox_exporter_container_extra_arguments: "{{ prometheus_blackbox_
 prometheus_blackbox_exporter_container_extra_arguments_auto: []
 prometheus_blackbox_exporter_container_extra_arguments_custom: []
 
-# A list of extra arguments to pass to the Prometheus blackbox exporter process
+# A list of extra arguments to pass to the process inside the container
 # Example: ['--SOME_ARGUMENT']
 prometheus_blackbox_exporter_process_extra_arguments: "{{ prometheus_blackbox_exporter_process_extra_arguments_auto + prometheus_blackbox_exporter_process_extra_arguments_custom }}"
-prometheus_blackbox_exporter_process_extra_arguments_auto: []
+prometheus_blackbox_exporter_process_extra_arguments_auto:
+  - --config.file=/config/config.yml
 prometheus_blackbox_exporter_process_extra_arguments_custom: []
 
 # List of systemd services that the Prometheus blackbox exporter systemd service depends on
